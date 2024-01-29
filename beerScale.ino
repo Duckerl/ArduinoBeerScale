@@ -1,31 +1,32 @@
 // Demo at https://wokwi.com/projects/383989569588126721
 
 #include "HX711.h"
-//#include "Wire.h"
-//#include "LCD_I2C.h"
 #include "LiquidCrystal_I2C.h"
-//LCD_I2C lcd(0x27, 16, 2); // Default address of most PCF8574 modules, change according
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+LiquidCrystal_I2C lcd(0x27, 20, 4);   // Standard Addresse der meisten PCF8574 Module, hier mit 4x20 Zeichen
 
 #define DOUT_PIN_1 4
 #define SCK_PIN_1 5
+
 #define DOUT_PIN_2 6
 #define SCK_PIN_2 7
+
 #define DOUT_PIN_3 8
 #define SCK_PIN_3 9
+
 #define DOUT_PIN_4 11
 #define SCK_PIN_4 12
+
 #define BUTTON_PIN 13 // Pin for the push button
 
 HX711 scale1, scale2, scale3, scale4;
 
-float calibration_factor_1 = 420; // Adjust this value for calibration
-float calibration_factor_2 = 420; // Adjust this value for calibration
-float calibration_factor_3 = 420; // Adjust this value for calibration
-float calibration_factor_4 = 420; // Adjust this value for calibration
+float calibration_factor_1 = -105000; // erfolgreich -105000;
+float calibration_factor_2 = -105000; // erfolgreich -105000; 
+float calibration_factor_3 = 105000; // erfolgreich 105000; 
+float calibration_factor_4 = 105000; // erfolgreich 105000; 
 
-const int SDA_PIN = A4;  // Replace with the actual SDA pin number
-const int SCL_PIN = A5;  // Replace with the actual SCL pin number
+const int SDA_PIN = A4;  // am Arduino Mega gibts speziell zugewiesene PINs für SDA
+const int SCL_PIN = A5;  // am Arduino Mega gibts speziell zugewiesene PINs für SCL
 
 void setup() {
   Serial.begin(9600);
@@ -40,22 +41,14 @@ void setup() {
   scale3.set_scale(calibration_factor_3);
   scale4.set_scale(calibration_factor_4);
 
-
-  // Explicitly set the SDA and SCL pins
-  //Wire.begin(SDA_PIN, SCL_PIN);
-  lcd.begin(16,2);
+  lcd.init();
   lcd.backlight();
-  
 
-  pinMode(BUTTON_PIN, INPUT_PULLUP); // Set up the button pin as input with pull-up resistor
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // Initialisiert den Button, INPUT_PULLUP initiallisiert einen digitalen Resistor zum Entstören des Signals
 }
 
 void loop() {
   // Check if the tare button is pressed
-  //if (digitalRead(BUTTON_PIN) == LOW) {
-  //  tare();
-  //  delay(500); // Optional debounce delay
-  //}
 
   static unsigned long lastDebounceTime = 0;
   static unsigned long debounceDelay = 200;
@@ -115,30 +108,30 @@ void loop() {
       lcd.println(" kg");
 
     lastReadingTime = millis(); // Update the last reading time
-    //delay(1000); // Optional delay to control the rate of readings
     }
   }    
-  //} else {
-    //Serial.println("Error: Unable to detect one or more HX711 modules.");
-    //lcd.print("Error: Unable to detect one or more HX711 modules.");
-  
-
-  
 }
 
+// Funktion fürs  Nullsetzen
 void tare() {
+  lcd.setCursor(0, 3);
   Serial.println("updating.");
+  lcd.clear();
+  lcd.println("tare");
   scale1.tare();
   scale2.tare();
   scale3.tare();
   scale4.tare();
 
   delay(100); // Add a small delay before re-taring
+  lcd.clear();
   Serial.println("updating..");
+  lcd.println("updating.");
   scale1.tare();
   scale2.tare();
   scale3.tare();
   scale4.tare();
+  lcd.clear();
   Serial.println("updating...");
+  lcd.println("updating..");
 }
-
