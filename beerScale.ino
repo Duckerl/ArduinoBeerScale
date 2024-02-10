@@ -4,8 +4,10 @@
 // Kallibrierungscode der offiziellen HX711 Bibliothek https://github.com/sparkfun/HX711-Load-Cell-Amplifier/tree/master/firmware/SparkFun_HX711_Calibration 
 
 #include "HX711.h"                    // Bibliothek der Wägezellen
-#include "LiquidCrystal_I2C.h"        // Bibliothek 
+#include "LiquidCrystal_I2C.h"        // Bibliothek des LCDs
+#include "SmoothProgress.h"           // Bibliothek der Progressbar
 LiquidCrystal_I2C lcd(0x27, 20, 4);   // Standard Addresse der meisten PCF8574 Module, hier mit 4x20 Zeichen
+#include <BarStyle4.h>                // Progressbar Style 4
 
 // !häufige Fehlerquelle: Pins aus dem Programm stimmen nicht mit den aus den Kommentaren überein
 #define DOUT_PIN_1 4  //Zelle 1 auf 4 & 5;
@@ -23,6 +25,10 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);   // Standard Addresse der meisten PCF8574 M
 #define BUTTON_PIN 13  // Pin für den Button;
 
 HX711 scale1, scale2, scale3, scale4;
+LCD dispA(lcd, barStyle4);
+
+// Create the object representing the smooth progress bar 
+SmoothProgressBar spb(dispA, 16, 2, 3); // progress bar 14 Zeichen lang, Anfang 3-te Spalte (zählt von 0 an),  4-te Zeile (zählt von 0 an)
 
 float calibration_factor_1 = -104500;  // erfolgreich -105000;
 float calibration_factor_2 = -105000;  // erfolgreich -105000;
@@ -33,6 +39,8 @@ const int SDA_PIN = A4;  // am Arduino Mega gibts speziell zugewiesene PINs für
 const int SCL_PIN = A5;  // am Arduino Mega gibts speziell zugewiesene PINs für SCL, daher eigentlich redundant
 
 bool buttonPressedDown = true;  //speichert den letzten Zustand des Buttons; theoretisch weiß der Button bei der Initailisierung nicht ob der Zustand gedrückt (=true) ist oder nicht, ist praktisch aber egal
+
+int progressPercentage = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -49,6 +57,8 @@ void setup() {
 
   lcd.init();
   lcd.backlight();
+
+  dispA.begin();
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);  // Initialisiert den Button, INPUT_PULLUP initiallisiert einen digitalen Resistor zum Entstören des Signals
 }
@@ -97,18 +107,20 @@ void loop() {
       // Setze den Wert auf 0, wenn er sehr nah an 0 liegt
       if (abs(totalWeight) < 0.001) {
         totalWeight = 0.0; 
-        }
+      }
+      // 80kg auf 100% umrechnen
+      progressPercentage = (totalWeight / 80)*100;
 
       Serial.print("Weight 1: ");
-      Serial.print(weight1, 2); // 2 Dezimalstellen anzeigen
+      Serial.print(weight1, 3); // 2 Dezimalstellen anzeigen
       Serial.println(" kg");
 
       Serial.print("Weight 2: ");
-      Serial.print(weight2, 2);
+      Serial.print(weight2, 3);
       Serial.println(" kg");
 
       Serial.print("Weight 3: ");
-      Serial.print(weight3, 2);
+      Serial.print(weight3, 3);
       Serial.println(" kg");
 
       Serial.print("Weight 4: ");
@@ -116,7 +128,7 @@ void loop() {
       Serial.println(" kg");
 
       Serial.print("Total Weight: ");
-      Serial.print(totalWeight, 2);
+      Serial.print(totalWeight, 3);
       Serial.println(" kg");
 
       lcd.clear();
@@ -125,6 +137,8 @@ void loop() {
       lcd.setCursor(0, 1);
       lcd.print(totalWeight, 2); 
       lcd.print(" kg");
+
+      spb.showProgressPct(progressPercentage);
 
       lastReadingTime = millis();  // Updatet zur aktuellen Waageauslesungszeit
     }
