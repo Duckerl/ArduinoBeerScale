@@ -112,7 +112,7 @@ void loop() {
       progressPercentage = (totalWeight / 80)*100;
 
       Serial.print("Weight 1: ");
-      Serial.print(weight1, 3); // 2 Dezimalstellen anzeigen
+      Serial.print(weight1, 3);     // 3 Dezimalstellen anzeigen
       Serial.println(" kg");
 
       Serial.print("Weight 2: ");
@@ -124,7 +124,7 @@ void loop() {
       Serial.println(" kg");
 
       Serial.print("Weight 4: ");
-      Serial.print(weight4, 2);
+      Serial.print(weight4, 3);
       Serial.println(" kg");
 
       Serial.print("Total Weight: ");
@@ -135,7 +135,7 @@ void loop() {
       lcd.setCursor(0, 0);
       lcd.print("Totales Gewicht: ");
       lcd.setCursor(0, 1);
-      lcd.print(totalWeight, 2); 
+      lcd.print(totalWeight, 2);     // 2 Dezimalstellen anzeigen
       lcd.print(" kg");
 
       spb.showProgressPct(progressPercentage);
