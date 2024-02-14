@@ -5,7 +5,7 @@
 
 #include "HX711.h"                    // Bibliothek der Wägezellen
 #include "LiquidCrystal_I2C.h"        // Bibliothek des LCDs
-#include "SmoothProgress.h"           // Bibliothek der Progressbar
+#include "SmoothProgress.h"           // Bibliothek der Progressbar https://github.com/Gjorgjevikj/SmoothProgress?tab=readme-ov-file
 LiquidCrystal_I2C lcd(0x27, 20, 4);   // Standard Addresse der meisten PCF8574 Module, hier mit 4x20 Zeichen
 #include <BarStyle4.h>                // Progressbar Style 4
 
@@ -27,8 +27,8 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);   // Standard Addresse der meisten PCF8574 M
 HX711 scale1, scale2, scale3, scale4;
 LCD dispA(lcd, barStyle4);
 
-// Create the object representing the smooth progress bar 
-SmoothProgressBar spb(dispA, 16, 2, 3); // progress bar 14 Zeichen lang, Anfang 3-te Spalte (zählt von 0 an),  4-te Zeile (zählt von 0 an)
+// Erstelle das Object zur Darstellung der Progressbar
+SmoothProgressBar spb(dispA, 16, 2, 3); // Progressbar 16 Zeichen lang, Anfang 3-te Spalte (zählt von 0 an),  4-te Zeile (zählt von 0 an)
 
 float calibration_factor_1 = -104500;  // erfolgreich -105000;
 float calibration_factor_2 = -105000;  // erfolgreich -105000;
@@ -38,8 +38,8 @@ float calibration_factor_4 = 105000;   // erfolgreich 105000;
 const int SDA_PIN = A4;  // am Arduino Mega gibts speziell zugewiesene PINs für SDA, daher eigentlich redundant
 const int SCL_PIN = A5;  // am Arduino Mega gibts speziell zugewiesene PINs für SCL, daher eigentlich redundant
 
-bool buttonPressedDown = true;  //speichert den letzten Zustand des Buttons; theoretisch weiß der Button bei der Initailisierung nicht ob der Zustand gedrückt (=true) ist oder nicht, ist praktisch aber egal
-
+bool buttonPressedDown = true;  // speichert den letzten Zustand des Buttons; theoretisch weiß der Button bei der Initailisierung nicht ob der Zustand gedrückt (=true) ist oder nicht,
+                                //ist praktisch aber egal und soagar hilfreich, da beim Programmstart automatisch ein Nullsetzen erfolgt
 int progressPercentage = 0;
 
 void setup() {
@@ -111,6 +111,7 @@ void loop() {
       // 80kg auf 100% umrechnen
       progressPercentage = (totalWeight / 80)*100;
 
+      // Ausgabe der Werte im Seriellen Monitor (am PC)
       Serial.print("Weight 1: ");
       Serial.print(weight1, 3);     // 3 Dezimalstellen anzeigen
       Serial.println(" kg");
@@ -131,6 +132,7 @@ void loop() {
       Serial.print(totalWeight, 3);
       Serial.println(" kg");
 
+      // Ausgabe am LCD der Waage
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Totales Gewicht: ");
@@ -145,7 +147,7 @@ void loop() {
   }
 }
 
-// Funktion fürs  Nullsetzen, .tare wird 2x ausgeführt für ein genaueres Ergebnis
+// Funktion fürs  Nullsetzen, tare wird 2x ausgeführt für ein genaueres Ergebnis
 void tare() {
   Serial.println("updating.");
   lcd.clear();
